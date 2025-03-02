@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dice Roller API</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: lightblue;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        
+        .container {
+            width: 400px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        .dice-display {
+            font-size: 72px;
+            margin: 20px 0;
+            height: 100px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .roll-button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        
+        .roll-button:hover {
+            background-color: #45a049;
+        }
+        
+        .roll-button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        
+        .status {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #555;
+            height: 20px;
+        }
+        
+        .loading {
+            color: #888;
+            font-style: italic;
+        }
+        
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Single Dice Roller</h1>
+        <p>Click the button to roll a single 6-sided die</p>
+        
+        <div class="dice-display" id="dice-display">-</div>
+        
+        <button id="roll-button" class="roll-button">Roll Dice</button>
+        
+        <div id="status" class="status"></div>
+    </div>
+    
+    <script>
+        // DOM elements
+        const rollButton = document.getElementById('roll-button');
+        const diceDisplay = document.getElementById('dice-display');
+        const statusDisplay = document.getElementById('status');
+        
+        // Roll the dice
+        async function rollDice() {
+            try {
+                // Disable button and show loading
+                rollButton.disabled = true;
+                diceDisplay.textContent = '...';
+                statusDisplay.textContent = 'Rolling...';
+                statusDisplay.className = 'status loading';
+                
+                // Call the API
+                const response = await fetch('/api/roll');
+                
+                if (!response.ok) {
+                    throw new Error(`Server error: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                // Display the result
+                diceDisplay.textContent = data.value;
+                statusDisplay.textContent = `Rolled at ${new Date().toLocaleTimeString()}`;
+                statusDisplay.className = 'status';
+            } catch (error) {
+                diceDisplay.textContent = 'Error';
+                statusDisplay.textContent = `Failed to roll: ${error.message}`;
+                statusDisplay.className = 'status error';
+            } finally {
+                // Re-enable button
+                rollButton.disabled = false;
+            }
+        }
+        
+        // Add event listener to button
+        rollButton.addEventListener('click', rollDice);
+    </script>
+</body>
+</html>
